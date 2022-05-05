@@ -1,0 +1,39 @@
+{
+	"compiler": {
+		"version": "0.5.17+commit.d19bba13"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [],
+		"devdoc": {
+			"details": "Library for managing addresses assigned to a Role.",
+			"methods": {},
+			"title": "Roles"
+		},
+		"userdoc": {
+			"methods": {}
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"openzeppelin/roles/Roles.sol": "Roles"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"openzeppelin/roles/Roles.sol": {
+			"keccak256": "0xd465b78997ef5912e0558bd44e254b1c27fd0d8067adf07e9888dd1863d1a859",
+			"urls": [
+				"bzz-raw://dcbbca346990a75ef42d9c85127999911bca8e4b2c68a7106cfe1cd470df0647",
+				"dweb:/ipfs/QmVCigQe8sXKQA7Q8qDye49XJKapKJmBu8fZTfTrLLyunt"
+			]
+		}
+	},
+	"version": 1
+}

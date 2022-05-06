@@ -20,10 +20,6 @@ contract UCMToken is ERC20, ERC20Detailed, MinterRole {
         _burn(account, amount);
     }
 
-    function stakeTransfer(address stakeOwner, uint amount) external onlyMinter {
-        _transfer(stakeOwner, owner, amount);
-    }
-
     modifier checkOwner() {
         require(msg.sender == owner, "Unauthorized");
         _;

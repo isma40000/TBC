@@ -1,0 +1,129 @@
+{
+	"compiler": {
+		"version": "0.5.17+commit.d19bba13"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "MinterAdded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "MinterRemoved",
+				"type": "event"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "addMinter",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "isMinter",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [],
+				"name": "renounceMinter",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"methods": {}
+		},
+		"userdoc": {
+			"methods": {}
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"openzeppelin/roles/MinterRole.sol": "MinterRole"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"openzeppelin/GSN/Context.sol": {
+			"keccak256": "0x80987e1294f2d1b2deef6b0c73e7ef3416831bd938b6f9d824c21583cd50517f",
+			"urls": [
+				"bzz-raw://19297a2b3e7d4aeb33b8e0180e96e6a427ac1cef844828087668adedce7ea2f3",
+				"dweb:/ipfs/QmZ3j76xF8ZHMwLCkPnF2btugcDRymDH3xXQym26aBvSKn"
+			]
+		},
+		"openzeppelin/roles/MinterRole.sol": {
+			"keccak256": "0xc15538d901d9f5a10b8d67aa8ef17aa799dc29bff292cb4fa7b0a3f36293dfff",
+			"urls": [
+				"bzz-raw://43a99428c9e5367f67c002a9c09d208aa12fe50a0c15ddbe80d5cbbe56945966",
+				"dweb:/ipfs/QmVMDuuxPyEVEJTW9nVVu8L3rT7CdM8B8Nb4bvRFes7huR"
+			]
+		},
+		"openzeppelin/roles/Roles.sol": {
+			"keccak256": "0xd465b78997ef5912e0558bd44e254b1c27fd0d8067adf07e9888dd1863d1a859",
+			"urls": [
+				"bzz-raw://dcbbca346990a75ef42d9c85127999911bca8e4b2c68a7106cfe1cd470df0647",
+				"dweb:/ipfs/QmVCigQe8sXKQA7Q8qDye49XJKapKJmBu8fZTfTrLLyunt"
+			]
+		}
+	},
+	"version": 1
+}

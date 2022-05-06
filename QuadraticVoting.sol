@@ -1,5 +1,4 @@
 pragma solidity ^0.5.0;
-pragma experimental ABIEncoderV2;
 
 import "./IQuadraticVoting.sol";
 
@@ -7,29 +6,38 @@ contract QuadraticVoting is IQuadraticVoting {
 
     address private owner;
     UCMToken private tokenContract;
-    uint8 private votingState; // 0 -> closed, 1 -> opened, 2 -> paused
-    uint public tokenPrice;
-    uint public maxTokens;
+    QuadraticVotingState private votingState;
+    uint private tokenPrice;
+    uint private maxTokens;
+
     uint private nParticipants;
-    mapping(address => bool) public participants;
+    mapping(address => bool) private participants;
+
     uint private nProposals;
     mapping(uint => Proposal) private proposals;
+    uint private initialProposalId;
     uint private lastProposalId;
+
+    uint [] private pendingProposalsIds;
+    uint [] private approvedProposalsIds;
+    uint [] private signalingProposalsIds;
 
 
     constructor(uint _tokenPrice, uint _maxTokens) public {
         owner = msg.sender;
         tokenContract = new UCMToken();
-        votingState = 0;
+        votingState = QuadraticVotingState.CLOSED;
         tokenPrice = _tokenPrice;
         maxTokens = _maxTokens;
+
         nParticipants = 0;
         nProposals = 0;
+        initialProposalId = 1;
         lastProposalId = 0;
     }
 
     //Devuelve el coste cuadrático de meter [votes] votos en la propuesta
-    function _calculateVoteCost(uint proposalId, uint votes) view internal returns(uint) {
+    function _calculateVoteCost(uint proposalId, uint votes) view private returns(uint) {
         uint oldVotes = proposals[proposalId].votes[msg.sender];
         uint oldPrice = oldVotes ** 2;
         uint totalVotes = oldVotes + votes;
@@ -38,7 +46,7 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     //Devuelve el coste cuadrático de meter [votes] votos en la propuesta
-    function _calculateWithdrawVote(uint proposalId, uint votes) view internal returns(uint) {
+    function _calculateWithdrawVote(uint proposalId, uint votes) view private returns(uint) {
         uint oldVotes = proposals[proposalId].votes[msg.sender];
         uint oldPrice = oldVotes ** 2;
         uint totalVotes = oldVotes - votes;
@@ -47,186 +55,171 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     //Devuelve el umbral de una propuesta
-    function _calculateThreshold(uint proposalId) view internal returns(uint) {
-        return (2 + (proposals[proposalId].minBudget*10) / (address(this).balance*10))/10 * nParticipants + nProposals;
+    function _calculateThreshold(uint proposalId) view private returns(uint) {
+        return (2 + (proposals[proposalId].budget*10) / (address(this).balance*10))/10 * nParticipants + nProposals;
     }
 
-    //Abre la votación
-    function openVoting() checkOwner external payable {
-        votingState = 1;
+    function _clear() private {
+        nProposals = 0;
+        initialProposalId = lastProposalId + 1;
+    }
+
+    function openVoting() checkOwner checkCanOpenVoting external payable {
+        votingState = QuadraticVotingState.OPEN;
+        _clear();
         emit OpenVote();
     }
 
-    //Añade un participante con la compra de tokens incluída
-    function addParticipant() checkMinimumPurchaseAmount(msg.value) external payable {
+    function addParticipant() checkMinimumPurchaseAmount(msg.value) checkNonParticipant external payable {
         participants[msg.sender] = true;
         tokenContract.mint(msg.sender, msg.value / tokenPrice);
         nParticipants++;
     }
 
-    //Añade una propuesta
-    function addProposal(string calldata title, string calldata description, uint minBudget, address executableProposal) checkParticipant checkVotingOpen external returns(uint) {
+    function addProposal(string calldata title, string calldata description, uint budget, address executableProposal) checkParticipant checkOpenVoting external returns(uint) {
         Proposal memory proposal;
         proposal.owner = msg.sender;
         proposal.executableProposal = IExecutableProposal(executableProposal);
         proposal.title = title;
         proposal.description = description;
-        proposal.minBudget = minBudget;
-        proposal.currentVotes = 0;
-        proposal.currentTokens = 0;
-        proposal.state = 0;
+        proposal.budget = budget;
+        proposal.votesAmount = 0;
+        proposal.tokensAmount = 0;
+        proposal.state = ProposalState.ENABLED;
         lastProposalId++;
         proposals[lastProposalId] = proposal;
         nProposals++;
         return lastProposalId;
     }
 
-    /*
-    Cuando se cancela una propuesta (si es posible), se debe:
-        -Anotar que ya no está activa.
-        -La devolución de todos los tokens correspondientes a los votantes la deben realizar estos.
-    */
-    function cancelProposal(uint id) checkParticipant checkVotingOpen checkProposalOwner(id) external {
-        if (proposals[id].state == 0) {
-            proposals[id].state = 1;
-            emit CanWithdrawnFromProposal(id);
-        }
+    function cancelProposal(uint id) checkParticipant checkOpenVoting checkProposalOwner(id) checkEnabledProposal(id) external {
+        proposals[id].state = ProposalState.DISABLED;
+        emit CanWithdrawnFromProposal(id);
     }
 
-    //Permite la compra de más tokens por Ether
-    function buyTokens() checkParticipant checkMinimumPurchaseAmount(msg.value) external payable {
+    function buyTokens() checkParticipant checkMinimumPurchaseAmount(msg.value) checkMaxTokens(msg.value / tokenPrice) external payable {
         tokenContract.mint(msg.sender, msg.value / tokenPrice);
     }
 
-    //Permite la venta de tokens por Ether
     function sellTokens(uint amount) checkParticipant checkTokenAmount(amount) external {
-        if (tokenContract.balanceOf(msg.sender) >= amount) {
-            tokenContract.burn(msg.sender, amount);
-            msg.sender.transfer(amount * tokenPrice);
-        }
+        tokenContract.burn(msg.sender, amount);
+        msg.sender.transfer(amount * tokenPrice);
     }
 
-    //Devuelve la dirección del contrato del token
     function getERC20() view external returns(UCMToken) {
         return tokenContract;
     }
 
-    //Devuelve un array con ids de propuesta pendientes
-    function getPendingProposals() checkVotingOpen view external returns(uint[] memory) {
-        uint [] memory ids;
-        return ids; //TODO
+    function getPendingProposals() checkOpenVoting external returns(uint[] memory) {
+        delete pendingProposalsIds;
+
+        //Duda ya preguntada a Jesús, tiene coste lineal respecto al número de propuestas actuales
+        for (uint id = initialProposalId; id <= lastProposalId; id++) {
+            if (proposals[id].state == ProposalState.ENABLED && proposals[id].budget > 0) {
+                pendingProposalsIds.push(id);
+            }
+        }
+
+        return pendingProposalsIds;
     }
 
-    //Devuelve un array con ids de propuesta aprobadas
-    function getApprovedProposals() checkVotingOpen view external returns(uint[] memory) {
-        uint [] memory ids;
-        return ids; //TODO
+    function getApprovedProposals() checkOpenVoting external returns(uint[] memory) {
+        delete approvedProposalsIds;
+
+        //Duda ya preguntada a Jesús, tiene coste lineal respecto al número de propuestas actuales
+        for (uint id = initialProposalId; id <= lastProposalId; id++) {
+            if (proposals[id].state == ProposalState.APPROVED && proposals[id].budget > 0) {
+                approvedProposalsIds.push(id);
+            }
+        }
+
+        return approvedProposalsIds;
     }
 
-    //Devuelve un array con ids de propuesta signaling
-    function getSignalingProposals() checkVotingOpen view external returns(uint[] memory) {
-        uint [] memory ids;
-        return ids; //TODO
+    function getSignalingProposals() checkOpenVoting external returns(uint[] memory) {
+        delete signalingProposalsIds;
+
+        //Duda ya preguntada a Jesús, tiene coste lineal respecto al número de propuestas actuales
+        for (uint id = initialProposalId; id <= lastProposalId; id++) {
+            if (proposals[id].state != ProposalState.DISABLED && proposals[id].budget == 0) {
+                signalingProposalsIds.push(id);
+            }
+        }
+
+        return signalingProposalsIds;
     }
 
-    //Devuelve información escasa de una propuesta
-    function getProposalInfo(uint id) checkVotingOpen view external returns(string memory title, string memory description, IExecutableProposal executableProposal) {
+    function getProposalInfo(uint id) checkOpenVoting view external returns(string memory title, string memory description, IExecutableProposal executableProposal) {
         return (proposals[id].title, proposals[id].description, proposals[id].executableProposal);
     }
 
-    //Permite votar una propuesta
-    function stake(uint id, uint votes) external {
+    function stake(uint id, uint votes) checkParticipant checkValidProposal(id) checkEnabledProposal(id) checkTokenAmount(_calculateVoteCost(id, votes)) external {
         uint tokenCost = _calculateVoteCost(id, votes);
-        if (tokenContract.balanceOf(msg.sender) >= tokenCost) { //Check if exist proposal id
-            tokenContract.stakeTransfer(msg.sender, tokenCost);
-            proposals[id].currentVotes += votes;
-
-            if (_isProposalApproved(id) && proposals[id].minBudget > 0) {
-                _approveProposal(id);
-            }
+        tokenContract.transfer(address(this), tokenCost);
+        proposals[id].votesAmount += votes;
+        proposals[id].tokensAmount += tokenCost;
+        if (proposals[id].budget > 0) {
+            _checkAndExecuteProposal(id);
         }
     }
 
-    function _withdrawFromFinanceProposal(uint amount, uint id) internal {
-        if (proposals[id].votes[msg.sender] > 0 && proposals[id].votes[msg.sender] >= amount && proposals[id].state != 2) {
-            uint tokenAmount = _calculateWithdrawVote(id, amount);
-            proposals[id].currentVotes -= proposals[id].votes[msg.sender];
-            proposals[id].votes[msg.sender] -= amount;
-            proposals[id].currentTokens -= tokenAmount;
+    function _withdrawFromFinanceProposal(uint amount, uint id) checkValidProposal(id) checkNonDisabledProposal(id) private {
+        uint tokenAmount = _calculateWithdrawVote(id, amount);
+        proposals[id].votesAmount -= amount;
+        proposals[id].votes[msg.sender] -= amount;
+        proposals[id].tokensAmount -= tokenAmount;
+        tokenContract.transfer(msg.sender, tokenAmount);
+    }
 
+    function _withdrawFromSignalingProposal(uint amount, uint id)  private {
+        if (votingState == QuadraticVotingState.OPEN) {
+            uint tokenAmount = _calculateWithdrawVote(id, amount);
+            proposals[id].votesAmount -= amount;
+            proposals[id].votes[msg.sender] -= amount;
+            proposals[id].tokensAmount -= tokenAmount;
+            tokenContract.transfer(msg.sender, tokenAmount);
+        } else if (votingState == QuadraticVotingState.WAITING) {
+            uint tokenAmount = _calculateWithdrawVote(id, amount);
+            proposals[id].votes[msg.sender] -= amount;
             tokenContract.transfer(msg.sender, tokenAmount);
         }
     }
 
-    function _withdrawFromSignalingProposal(uint amount, uint id) internal {
-        if (votingState == 1) {
-            if (proposals[id].votes[msg.sender] > 0 && proposals[id].votes[msg.sender] >= amount) {
-                uint tokenAmount = _calculateWithdrawVote(id, amount);
-                proposals[id].currentVotes -= proposals[id].votes[msg.sender];
-                proposals[id].votes[msg.sender] -= amount;
-                proposals[id].currentTokens -= tokenAmount;
-
-                tokenContract.transfer(msg.sender, tokenAmount);
-            }
-        } else if (votingState == 2) {
-            if (proposals[id].votes[msg.sender] > 0 && proposals[id].votes[msg.sender] >= amount) {
-                uint tokenAmount = _calculateWithdrawVote(id, amount);
-                proposals[id].votes[msg.sender] -= amount;
-                proposals[id].currentTokens -= tokenAmount;
-
-                tokenContract.transfer(msg.sender, tokenAmount);
-            }
-
-        }
-    }
-
-    //Permite retirar votos de una propuesta, lo que devolverá tokens al usuario
-    function withdrawFromProposal(uint amount, uint id) checkParticipant external {
-        if (proposals[id].minBudget > 0) _withdrawFromFinanceProposal(amount, id);
+    function withdrawFromProposal(uint amount, uint id) checkParticipant checkValidProposal(id) checkVotes(id, amount) external {
+        if (proposals[id].budget > 0) _withdrawFromFinanceProposal(amount, id);
         else _withdrawFromSignalingProposal(amount, id);
     }
 
-    //Devuelve si una propuesta está aprobada
     function _isProposalApproved(uint proposalId) view internal returns(bool) {
         Proposal memory proposal = proposals[proposalId];
-        return proposal.minBudget < address(this).balance && proposal.currentVotes > _calculateThreshold(proposalId);
+        return proposal.budget < address(this).balance && proposal.votesAmount > _calculateThreshold(proposalId);
     }
-
-    /*
-    Cuando se aprueba una propuesta, se debe:
-        -Anotar que ya no está activa.
-        -Quemar todos los tokens correspondientes a la propuesta si no es Signalin.
-        -Ejecutar la función de ejecución del contrato pasado en la creación de la propuesta.
-        -Cuando se ejecutas, realizar la transferencia de Ether a este contrato.
-    */
-    function _approveProposal(uint proposalId) internal {
-        proposals[proposalId].state = 2;
+    
+    function _approveProposal(uint proposalId) private {
+        nProposals--;
+        proposals[proposalId].state = ProposalState.APPROVED;
         Proposal memory proposal = proposals[proposalId];
 
-        if (proposal.minBudget > 0) {
-            tokenContract.burn(address(this), proposal.currentTokens);
+        if (proposal.budget > 0) {
+            tokenContract.burn(address(this), proposal.tokensAmount);
         }
         
-        proposal.executableProposal.executeProposal.value(proposal.minBudget)(proposalId, proposal.currentVotes, proposal.currentTokens);
+        proposal.executableProposal.executeProposal.value(proposal.budget)(proposalId, proposal.votesAmount, proposal.tokensAmount);
     }
 
-    //Refactorizar con métodos de arriba
     function _checkAndExecuteProposal(uint id) internal {
         if (_isProposalApproved(id)) {
             _approveProposal(id);
         }
     }
 
-    //Cierre de votación, necesitamos hacer algo más?
-    function closeVoting() checkOwner external payable {
-        votingState = 2;
-        emit ClosedVote();
+    function closeVoting() checkOwner external {
+        votingState = QuadraticVotingState.WAITING;
+        emit WaitingVote();
     }
 
-    function executeSignaling(uint id) checkParticipant checkProposalOwner(id) external {
-        if (votingState == 2) {
-            _approveProposal(id);
-        }
+    function executeSignaling(uint id) checkParticipant checkProposalOwner(id) checkWaitingVoting external {
+        _approveProposal(id);
     }
 
     modifier checkOwner() {
@@ -239,13 +232,38 @@ contract QuadraticVoting is IQuadraticVoting {
         _;
     }
 
-    modifier checkVotingOpen() {
-        require(votingState == 1, "Voting not open");
+    modifier checkNonParticipant() {
+        require(!participants[msg.sender], "Already participant");
+        _;
+    }
+
+    modifier checkClosedVoting() {
+        require(votingState == QuadraticVotingState.CLOSED, "Voting not closed");
+        _;
+    }
+
+    modifier checkOpenVoting() {
+        require(votingState == QuadraticVotingState.OPEN, "Voting not open");
+        _;
+    }
+
+    modifier checkWaitingVoting() {
+        require(votingState == QuadraticVotingState.WAITING, "Voting not waiting");
+        _;
+    }
+
+    modifier checkCanOpenVoting() {
+        require(votingState == QuadraticVotingState.WAITING || votingState == QuadraticVotingState.CLOSED, "Voting cannot open");
         _;
     }
 
     modifier checkProposalOwner(uint id) {
         require(proposals[id].owner == msg.sender, "Unauthorized");
+        _;
+    }
+
+    modifier checkVotes(uint id, uint votes) {
+        require(proposals[id].votes[msg.sender] >= votes, "Unauthorized");
         _;
     }
 
@@ -256,6 +274,36 @@ contract QuadraticVoting is IQuadraticVoting {
 
     modifier checkTokenAmount(uint amount) {
         require(amount >= tokenContract.balanceOf(msg.sender), "Invalid amount");
+        _;
+    }
+
+    modifier checkMaxTokens(uint amount) {
+        require(tokenContract.totalSupply() + amount < maxTokens , "The maximum number of tokens has been generated");
+        _;
+    }
+
+    modifier checkValidProposal(uint id) {
+        require(initialProposalId <= id && id <= lastProposalId, "Proposal id not valid");
+        _;
+    }
+
+    modifier checkEnabledProposal(uint id) {
+        require(proposals[id].state == ProposalState.ENABLED, "Proposal not enabled");
+        _;
+    }
+
+    modifier checkDisabledProposal(uint id) {
+        require(proposals[id].state == ProposalState.DISABLED, "Proposal not disabled");
+        _;
+    }
+
+    modifier checkApprovedProposal(uint id) {
+        require(proposals[id].state == ProposalState.APPROVED, "Proposal not approved");
+        _;
+    }
+
+    modifier checkNonDisabledProposal(uint id) {
+        require(proposals[id].state != ProposalState.DISABLED, "Proposal disabled");
         _;
     }
 }

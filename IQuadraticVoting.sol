@@ -6,19 +6,23 @@ import "./IExecutableProposal.sol";
 interface IQuadraticVoting {
 
     event OpenVote();
+    event WaitingVote();
     event CanWithdrawnFromProposal(uint proposalId);
-    event ClosedVote();
+
+    enum QuadraticVotingState { CLOSED, OPEN, WAITING }
+
+    enum ProposalState { ENABLED, DISABLED, APPROVED }
 
     struct Proposal {
         address owner;
         IExecutableProposal executableProposal;
         string title;
         string description;
-        uint minBudget; //Amount in Ether
-        uint currentVotes;
-        uint currentTokens;
+        uint budget;
+        uint votesAmount;
+        uint tokensAmount;
         mapping(address => uint) votes;
-        uint8 state; // 0 -> enabled, 1 -> disabled, 2 -> aprobed
+        ProposalState state;
     }
 
     function openVoting() external payable;
@@ -28,11 +32,11 @@ interface IQuadraticVoting {
     function buyTokens() external payable;
     function sellTokens(uint amount) external;
     function getERC20() view external returns(UCMToken);
-    function getPendingProposals() view external returns(uint[] memory);
-    function getApprovedProposals() view external returns(uint[] memory);
-    function getSignalingProposals() view external returns(uint[] memory);
+    function getPendingProposals() external returns(uint[] memory);
+    function getApprovedProposals() external returns(uint[] memory);
+    function getSignalingProposals() external returns(uint[] memory);
     function stake(uint id, uint votes) external;
     function withdrawFromProposal(uint amount, uint id) external;
-    function closeVoting() external payable;
+    function closeVoting() external;
     function executeSignaling(uint id) external;
 }

@@ -1,0 +1,343 @@
+{
+	"compiler": {
+		"version": "0.5.17+commit.d19bba13"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "proposalId",
+						"type": "uint256"
+					}
+				],
+				"name": "CanWithdrawnFromProposal",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [],
+				"name": "ClosedVote",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [],
+				"name": "OpenVote",
+				"type": "event"
+			},
+			{
+				"constant": false,
+				"inputs": [],
+				"name": "addParticipant",
+				"outputs": [],
+				"payable": true,
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "title",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minBudget",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "executableProposal",
+						"type": "address"
+					}
+				],
+				"name": "addProposal",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [],
+				"name": "buyTokens",
+				"outputs": [],
+				"payable": true,
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					}
+				],
+				"name": "cancelProposal",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [],
+				"name": "closeVoting",
+				"outputs": [],
+				"payable": true,
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					}
+				],
+				"name": "executeSignaling",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getApprovedProposals",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getERC20",
+				"outputs": [
+					{
+						"internalType": "contract UCMToken",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getPendingProposals",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getSignalingProposals",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [],
+				"name": "openVoting",
+				"outputs": [],
+				"payable": true,
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "sellTokens",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "votes",
+						"type": "uint256"
+					}
+				],
+				"name": "stake",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					}
+				],
+				"name": "withdrawFromProposal",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"methods": {}
+		},
+		"userdoc": {
+			"methods": {}
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"IQuadraticVoting.sol": "IQuadraticVoting"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"IExecutableProposal.sol": {
+			"keccak256": "0xb919c159738a5304feaef80039447e80e05fa9d60d7997d9d072ab99b4387384",
+			"urls": [
+				"bzz-raw://79a8b33dfb4d525254468d396c5d02d9ebf939eca502f7a7a42bd6f3602ad216",
+				"dweb:/ipfs/QmZ6P2t5CBMfjZxsAaCHRB1nJqBKRK8Bkj5e7xLZuyvJfP"
+			]
+		},
+		"IQuadraticVoting.sol": {
+			"keccak256": "0x1832e382bcb0d907741e94461de8079795f9aceeb03463e0b72687978f1ebb92",
+			"urls": [
+				"bzz-raw://411f3a7a859aad9b74daa85184e4e010b245ba3d996ea6c35b71552fbdabeb45",
+				"dweb:/ipfs/QmXX6VpX2LW5QKwicQTJL4TUKDe1dGFAwYNqywTDafXdw3"
+			]
+		},
+		"UCMToken.sol": {
+			"keccak256": "0x45d17b588ce54ecbee037a4e9bd7e2ee99be110dbc26e80c1783ea1d067146ad",
+			"urls": [
+				"bzz-raw://8de1665df03ce5b98b6b5e913c7a529d6408c99a26351bebe009c14d643d2d85",
+				"dweb:/ipfs/Qmet5CJpy8qtZ3VcDSPmuJ13Z4vUpUn4qEfAdxEKtGucB9"
+			]
+		},
+		"openzeppelin/ERC20.sol": {
+			"keccak256": "0xdf6a0b14735e1306a712f53b25b2b2c5cf1ade022e3bd16b19031e60d9a05db2",
+			"urls": [
+				"bzz-raw://447e6129ed071364c2149c4819fe39ab4262d49b8284bf33700edc6e3d65f751",
+				"dweb:/ipfs/QmVF1aCzrEk6X81p36sMvjJp6mDuaMpAvGRwb72HnfPRTd"
+			]
+		},
+		"openzeppelin/ERC20Detailed.sol": {
+			"keccak256": "0xcd32454b8ec5f73a3258f95654ae624106e983156d9df0316213f3abc6bb033a",
+			"urls": [
+				"bzz-raw://3385af1dc163ef05b9ca78d898d26c3b65f76547b413eef8b00d5264c8b7b7a4",
+				"dweb:/ipfs/QmTkyhiSJEXgiXHd8EihuQEri613mCXeSnMBBYMgVJDFRV"
+			]
+		},
+		"openzeppelin/GSN/Context.sol": {
+			"keccak256": "0x80987e1294f2d1b2deef6b0c73e7ef3416831bd938b6f9d824c21583cd50517f",
+			"urls": [
+				"bzz-raw://19297a2b3e7d4aeb33b8e0180e96e6a427ac1cef844828087668adedce7ea2f3",
+				"dweb:/ipfs/QmZ3j76xF8ZHMwLCkPnF2btugcDRymDH3xXQym26aBvSKn"
+			]
+		},
+		"openzeppelin/IERC20.sol": {
+			"keccak256": "0x694b989b371044e7a6730ce6d4b3da45679b7d5a5ff57cb6d6d84d567add5312",
+			"urls": [
+				"bzz-raw://529be491ce5d5ff6de81273a85d17fdd0a7e1f50121b7a8b886f3612ad39caa1",
+				"dweb:/ipfs/Qmd2KFSZtkSeyUES6z2c2UdZhMQ6AgKLz6DXkqX5ApyfFE"
+			]
+		},
+		"openzeppelin/math/SafeMath.sol": {
+			"keccak256": "0x4424fbd3867daab73c27b540b229440a2674cb06ef6af869a68fb4df779c6c88",
+			"urls": [
+				"bzz-raw://145f661fede2b29cfc68e89c98ce835bc187a80b5ba1c20dc4b10612036c8ef9",
+				"dweb:/ipfs/QmaZcvyrSQsFpmG83qHZZeHVZKdGxRz2p2PKfw447cxTZh"
+			]
+		},
+		"openzeppelin/roles/MinterRole.sol": {
+			"keccak256": "0xc15538d901d9f5a10b8d67aa8ef17aa799dc29bff292cb4fa7b0a3f36293dfff",
+			"urls": [
+				"bzz-raw://43a99428c9e5367f67c002a9c09d208aa12fe50a0c15ddbe80d5cbbe56945966",
+				"dweb:/ipfs/QmVMDuuxPyEVEJTW9nVVu8L3rT7CdM8B8Nb4bvRFes7huR"
+			]
+		},
+		"openzeppelin/roles/Roles.sol": {
+			"keccak256": "0xd465b78997ef5912e0558bd44e254b1c27fd0d8067adf07e9888dd1863d1a859",
+			"urls": [
+				"bzz-raw://dcbbca346990a75ef42d9c85127999911bca8e4b2c68a7106cfe1cd470df0647",
+				"dweb:/ipfs/QmVCigQe8sXKQA7Q8qDye49XJKapKJmBu8fZTfTrLLyunt"
+			]
+		}
+	},
+	"version": 1
+}

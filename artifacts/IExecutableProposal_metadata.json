@@ -1,0 +1,63 @@
+{
+	"compiler": {
+		"version": "0.5.17+commit.d19bba13"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "proposalId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "numVotes",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "numTokens",
+						"type": "uint256"
+					}
+				],
+				"name": "executeProposal",
+				"outputs": [],
+				"payable": true,
+				"stateMutability": "payable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"methods": {}
+		},
+		"userdoc": {
+			"methods": {}
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"IExecutableProposal.sol": "IExecutableProposal"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"IExecutableProposal.sol": {
+			"keccak256": "0xb919c159738a5304feaef80039447e80e05fa9d60d7997d9d072ab99b4387384",
+			"urls": [
+				"bzz-raw://79a8b33dfb4d525254468d396c5d02d9ebf939eca502f7a7a42bd6f3602ad216",
+				"dweb:/ipfs/QmZ6P2t5CBMfjZxsAaCHRB1nJqBKRK8Bkj5e7xLZuyvJfP"
+			]
+		}
+	},
+	"version": 1
+}

@@ -21,13 +21,13 @@
 			{
 				"anonymous": false,
 				"inputs": [],
-				"name": "ClosedVote",
+				"name": "OpenVote",
 				"type": "event"
 			},
 			{
 				"anonymous": false,
 				"inputs": [],
-				"name": "OpenVote",
+				"name": "WaitingVote",
 				"type": "event"
 			},
 			{
@@ -104,8 +104,8 @@
 				"inputs": [],
 				"name": "closeVoting",
 				"outputs": [],
-				"payable": true,
-				"stateMutability": "payable",
+				"payable": false,
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -124,7 +124,7 @@
 				"type": "function"
 			},
 			{
-				"constant": true,
+				"constant": false,
 				"inputs": [],
 				"name": "getApprovedProposals",
 				"outputs": [
@@ -135,7 +135,7 @@
 					}
 				],
 				"payable": false,
-				"stateMutability": "view",
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -154,7 +154,7 @@
 				"type": "function"
 			},
 			{
-				"constant": true,
+				"constant": false,
 				"inputs": [],
 				"name": "getPendingProposals",
 				"outputs": [
@@ -165,11 +165,11 @@
 					}
 				],
 				"payable": false,
-				"stateMutability": "view",
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
-				"constant": true,
+				"constant": false,
 				"inputs": [],
 				"name": "getSignalingProposals",
 				"outputs": [
@@ -180,7 +180,7 @@
 					}
 				],
 				"payable": false,
-				"stateMutability": "view",
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -276,17 +276,17 @@
 			]
 		},
 		"IQuadraticVoting.sol": {
-			"keccak256": "0x1832e382bcb0d907741e94461de8079795f9aceeb03463e0b72687978f1ebb92",
+			"keccak256": "0x96fcf4cdfa8924e6b50923cf87ef4877a82944f20bf27997b3352a191ccd6dc2",
 			"urls": [
-				"bzz-raw://411f3a7a859aad9b74daa85184e4e010b245ba3d996ea6c35b71552fbdabeb45",
-				"dweb:/ipfs/QmXX6VpX2LW5QKwicQTJL4TUKDe1dGFAwYNqywTDafXdw3"
+				"bzz-raw://e177b8c3e2630309e06685c4cbebf89531135e08591f129bce54518cc8450baf",
+				"dweb:/ipfs/QmbYor4eCcBHZkvMKQAsUb2pRcmyKYfcpLXQv9vFNqqfZQ"
 			]
 		},
 		"UCMToken.sol": {
-			"keccak256": "0x45d17b588ce54ecbee037a4e9bd7e2ee99be110dbc26e80c1783ea1d067146ad",
+			"keccak256": "0xd738bca521c77734a2f00f2e51c4870195a037943650c9a4a8663694d7d81d9c",
 			"urls": [
-				"bzz-raw://8de1665df03ce5b98b6b5e913c7a529d6408c99a26351bebe009c14d643d2d85",
-				"dweb:/ipfs/Qmet5CJpy8qtZ3VcDSPmuJ13Z4vUpUn4qEfAdxEKtGucB9"
+				"bzz-raw://cdd1042952198409550174c2c761ad6ac16a5d8de8689106ea341e8705820d32",
+				"dweb:/ipfs/QmQEo6256uGZ5pXXUCDfSFmoLdyvAubhVBArecFNWmLCkT"
 			]
 		},
 		"openzeppelin/ERC20.sol": {

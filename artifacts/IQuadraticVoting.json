@@ -77,13 +77,13 @@
 		{
 			"anonymous": false,
 			"inputs": [],
-			"name": "ClosedVote",
+			"name": "OpenVote",
 			"type": "event"
 		},
 		{
 			"anonymous": false,
 			"inputs": [],
-			"name": "OpenVote",
+			"name": "WaitingVote",
 			"type": "event"
 		},
 		{
@@ -160,8 +160,8 @@
 			"inputs": [],
 			"name": "closeVoting",
 			"outputs": [],
-			"payable": true,
-			"stateMutability": "payable",
+			"payable": false,
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -180,7 +180,7 @@
 			"type": "function"
 		},
 		{
-			"constant": true,
+			"constant": false,
 			"inputs": [],
 			"name": "getApprovedProposals",
 			"outputs": [
@@ -191,7 +191,7 @@
 				}
 			],
 			"payable": false,
-			"stateMutability": "view",
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
@@ -210,7 +210,7 @@
 			"type": "function"
 		},
 		{
-			"constant": true,
+			"constant": false,
 			"inputs": [],
 			"name": "getPendingProposals",
 			"outputs": [
@@ -221,11 +221,11 @@
 				}
 			],
 			"payable": false,
-			"stateMutability": "view",
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
-			"constant": true,
+			"constant": false,
 			"inputs": [],
 			"name": "getSignalingProposals",
 			"outputs": [
@@ -236,7 +236,7 @@
 				}
 			],
 			"payable": false,
-			"stateMutability": "view",
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{

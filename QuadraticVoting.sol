@@ -79,7 +79,7 @@ contract QuadraticVoting is IQuadraticVoting {
     function addProposal(string calldata title, string calldata description, uint budget, address executableProposal) checkParticipant checkOpenVoting external returns(uint) {
         Proposal memory proposal;
         proposal.owner = msg.sender;
-        proposal.executableProposal = IExecutableProposal(executableProposal);
+        proposal.executableProposal = IExecutableProposal(executableProposal);//IExecutableProposal(payable(executableProposal))Creo que es así
         proposal.title = title;
         proposal.description = description;
         proposal.budget = budget;
@@ -87,13 +87,39 @@ contract QuadraticVoting is IQuadraticVoting {
         proposal.tokensAmount = 0;
         proposal.state = ProposalState.ENABLED;
         lastProposalId++;
+        //
+        if(budget!=0){//guardo en la propuesta la posicion que ocupa en el array respectivo suponiendo que push meta en la última
+            proposal.posArrays=pendingProposalsIds.length;
+            pendingProposalsIds.push(lastProposalId);
+        }else{
+            proposal.posArrays=signalingProposalsIds.length;
+            signalingProposalsIds.push(lastProposalId);
+        }
+        //
         proposals[lastProposalId] = proposal;
         nProposals++;
+
         return lastProposalId;
     }
 
     function cancelProposal(uint id) checkParticipant checkOpenVoting checkProposalOwner(id) checkEnabledProposal(id) external {
         proposals[id].state = ProposalState.DISABLED;
+        //
+        if(proposals[id].budget!=0){
+            uint idUltima = pendingProposalsIds[pendingProposalsIds.length-1];//id de la ultima propuesta de array pending
+            uint posABorrar = proposals[id].posArrays;//posicion de propuesta q hay q borrar en pending
+            proposals[idUltima].posArrays = posABorrar;//actualizo pos de la ultima q ocupara la pos en pending de la borrada
+            pendingProposalsIds[posABorrar]= idUltima;//actualizo el id de la posicion de pending q ocupaba la q se borra
+            pendingProposalsIds.pop();//elimino la ultima q ha sido guardada en la posicion de la q queriamos borrar
+        }else{
+            uint idUltima = signalingProposalsIds[signalingProposalsIds.length-1];
+            uint posABorrar = proposals[id].posArrays;
+            proposals[idUltima].posArrays = posABorrar;
+            signalingProposalsIds[posABorrar]= idUltima;
+            signalingProposalsIds.pop();
+        }
+        delete proposals[id].posArrays;
+        //
         emit CanWithdrawnFromProposal(id);
     }
 
@@ -111,7 +137,7 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     function getPendingProposals() checkOpenVoting external returns(uint[] memory) {
-        delete pendingProposalsIds;
+        delete pendingProposalsIds;//TODO¿?No tengo claro para qué
 
         //Duda ya preguntada a Jesús, tiene coste lineal respecto al número de propuestas actuales
         for (uint id = initialProposalId; id <= lastProposalId; id++) {
@@ -180,7 +206,7 @@ contract QuadraticVoting is IQuadraticVoting {
             tokenContract.transfer(msg.sender, tokenAmount);
         } else if (votingState == QuadraticVotingState.WAITING) {
             uint tokenAmount = _calculateWithdrawVote(id, amount);
-            proposals[id].votes[msg.sender] -= amount;
+            proposals[id].votes[msg.sender] -= amount;//TODO si está en waiting no habría que restar votos creo
             tokenContract.transfer(msg.sender, tokenAmount);
         }
     }
@@ -204,6 +230,24 @@ contract QuadraticVoting is IQuadraticVoting {
             tokenContract.burn(address(this), proposal.tokensAmount);
         }
         
+        //No lo combino con el if de arriba por si no se queda este codigo
+        if(proposals[proposalId].budget>0){
+            uint idUltima = pendingProposalsIds[pendingProposalsIds.length-1];//id de la ultima propuesta de array pending
+            uint posABorrar = proposals[proposalId].posArrays;//posicion de propuesta q hay q borrar en pending
+            proposals[idUltima].posArrays = posABorrar;//actualizo pos de la ultima q ocupara la pos en pending de la borrada
+            pendingProposalsIds[posABorrar]= idUltima;//actualizo el id de la posicion de pending q ocupaba la q se borra
+            pendingProposalsIds.pop();//elimino la ultima q ha sido guardada en la posicion de la q queriamos borrar
+        }else{
+            uint idUltima = signalingProposalsIds[signalingProposalsIds.length-1];
+            uint posABorrar = proposals[proposalId].posArrays;
+            proposals[idUltima].posArrays = posABorrar;
+            signalingProposalsIds[posABorrar]= idUltima;
+            signalingProposalsIds.pop();
+        }
+        proposals[proposalId].posArrays=approvedProposalsIds.length;
+        approvedProposalsIds.push(proposalId);
+        //
+
         proposal.executableProposal.executeProposal.value(proposal.budget)(proposalId, proposal.votesAmount, proposal.tokensAmount);
     }
 

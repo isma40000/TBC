@@ -23,6 +23,7 @@ interface IQuadraticVoting {
         uint tokensAmount;
         mapping(address => uint) votes;
         ProposalState state;
+        uint posArrays;
     }
 
     function openVoting() external payable;

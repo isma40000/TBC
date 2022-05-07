@@ -18,6 +18,8 @@ contract QuadraticVoting is IQuadraticVoting {
     uint private initialProposalId;
     uint private lastProposalId;
 
+    uint private closedate;
+
     uint [] private pendingProposalsIds;
     uint [] private approvedProposalsIds;
     uint [] private signalingProposalsIds;
@@ -66,6 +68,7 @@ contract QuadraticVoting is IQuadraticVoting {
 
     function openVoting() checkOwner checkCanOpenVoting external payable {
         votingState = QuadraticVotingState.OPEN;
+        closedate=0;
         _clear();
         emit OpenVote();
     }
@@ -232,8 +235,9 @@ contract QuadraticVoting is IQuadraticVoting {
         }
     }
 
-    function closeVoting() checkOwner external {
+    function closeVoting() checkOwner checkOpenVoting external {
         votingState = QuadraticVotingState.WAITING;
+        closedate = now;
         emit WaitingVote();
     }
 
@@ -267,7 +271,7 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     modifier checkCanOpenVoting() {
-        require(votingState == QuadraticVotingState.WAITING || votingState == QuadraticVotingState.CLOSED, "Voting cannot open");
+        require((votingState == QuadraticVotingState.WAITING && closedate + 604800 > now) || votingState == QuadraticVotingState.CLOSED, "Voting cannot open");
         _;
     }
 

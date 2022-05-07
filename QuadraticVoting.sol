@@ -131,7 +131,9 @@ contract QuadraticVoting is IQuadraticVoting {
     function getERC20() view external returns(UCMToken) {
         return tokenContract;
     }
-
+    function getTokensNumber() view external returns(uint) {
+        return tokenContract.balanceOf(msg.sender);
+    }
     function getPendingProposals() checkOpenVoting view external returns(uint[] memory) {
         return pendingProposalsIds;
     }
@@ -152,6 +154,7 @@ contract QuadraticVoting is IQuadraticVoting {
         uint tokenCost = _calculateVoteCost(id, votes);
         tokenContract.transferFrom(msg.sender, address(this), tokenCost);
         proposals[id].votesAmount += votes;
+        proposals[id].votes[msg.sender] += votes;
         proposals[id].tokensAmount += tokenCost;
         if (proposals[id].budget > 0) {
             _checkAndExecuteProposal(id);
@@ -239,7 +242,7 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     modifier checkOwner() {
-        require(msg.sender == owner, "Unauthorized");
+        require(msg.sender == owner, "Not Owner: Unauthorized");
         _;
     }
 
@@ -269,12 +272,12 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     modifier checkProposalOwner(uint id) {
-        require(proposals[id].owner == msg.sender, "Unauthorized");
+        require(proposals[id].owner == msg.sender, "Not Proposal Owner: Unauthorized");
         _;
     }
 
     modifier checkVotes(uint id, uint votes) {
-        require(proposals[id].votes[msg.sender] >= votes, "Unauthorized");
+        require(proposals[id].votes[msg.sender] >= votes, "Not Enough Votes: Unauthorized");
         _;
     }
 

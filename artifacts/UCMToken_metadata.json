@@ -328,26 +328,6 @@
 				"type": "function"
 			},
 			{
-				"constant": false,
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "stakeOwner",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
-				"name": "stakeTransfer",
-				"outputs": [],
-				"payable": false,
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
 				"constant": true,
 				"inputs": [],
 				"name": "symbol",
@@ -490,10 +470,10 @@
 	},
 	"sources": {
 		"UCMToken.sol": {
-			"keccak256": "0x45d17b588ce54ecbee037a4e9bd7e2ee99be110dbc26e80c1783ea1d067146ad",
+			"keccak256": "0xd738bca521c77734a2f00f2e51c4870195a037943650c9a4a8663694d7d81d9c",
 			"urls": [
-				"bzz-raw://8de1665df03ce5b98b6b5e913c7a529d6408c99a26351bebe009c14d643d2d85",
-				"dweb:/ipfs/Qmet5CJpy8qtZ3VcDSPmuJ13Z4vUpUn4qEfAdxEKtGucB9"
+				"bzz-raw://cdd1042952198409550174c2c761ad6ac16a5d8de8689106ea341e8705820d32",
+				"dweb:/ipfs/QmQEo6256uGZ5pXXUCDfSFmoLdyvAubhVBArecFNWmLCkT"
 			]
 		},
 		"openzeppelin/ERC20.sol": {

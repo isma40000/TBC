@@ -232,6 +232,21 @@
 				"type": "function"
 			},
 			{
+				"constant": true,
+				"inputs": [],
+				"name": "getTokensNumber",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"constant": false,
 				"inputs": [],
 				"name": "openVoting",
@@ -331,10 +346,10 @@
 			]
 		},
 		"QuadraticVoting.sol": {
-			"keccak256": "0x47380c795051541268b85e63ca8123ccbc892785af57a209bc9b76ca68498a19",
+			"keccak256": "0x27bce5cfc6e191745915a025adf85f26be506090dafc133e2822dc80af00bdbb",
 			"urls": [
-				"bzz-raw://c7421383950a95b9b42218ec3842a2b848ebe94d31e60352ab3ed5b742246e21",
-				"dweb:/ipfs/QmSkYGbj88FDXcG1cq6eazwYk42fLg6eiev8MpCK6xwhDb"
+				"bzz-raw://9a5a88376e447c06655dafee14aaefa8e27a8f68aa06945185ff552c0ff00e38",
+				"dweb:/ipfs/Qmcn226XFmsohrDmBwV5G8R5sS71EEHFBPoJhNZchjJRPJ"
 			]
 		},
 		"UCMToken.sol": {

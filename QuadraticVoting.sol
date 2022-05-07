@@ -271,8 +271,8 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     modifier checkCanOpenVoting() {
-        require((votingState == QuadraticVotingState.WAITING && closedate + 604800 > now) || votingState == QuadraticVotingState.CLOSED, "Voting cannot open");
-        _;
+        require((votingState == QuadraticVotingState.WAITING && closedate + 604800 < now) || votingState == QuadraticVotingState.CLOSED, "Voting cannot open");
+        _;//604800 = una semana en segundos
     }
 
     modifier checkProposalOwner(uint id) {

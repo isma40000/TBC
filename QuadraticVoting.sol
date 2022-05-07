@@ -36,8 +36,7 @@ contract QuadraticVoting is IQuadraticVoting {
         lastProposalId = 0;
     }
 
-    //Devuelve el coste cuadrático de meter [votes] votos en la propuesta
-    function _calculateVoteCost(uint proposalId, uint votes) view private returns(uint) {
+    function _calculateVoteCost(uint proposalId, uint votes) view internal returns(uint) {
         uint oldVotes = proposals[proposalId].votes[msg.sender];
         uint oldPrice = oldVotes ** 2;
         uint totalVotes = oldVotes + votes;
@@ -45,8 +44,7 @@ contract QuadraticVoting is IQuadraticVoting {
         return totalPrice - oldPrice;
     }
 
-    //Devuelve el coste cuadrático de meter [votes] votos en la propuesta
-    function _calculateWithdrawVote(uint proposalId, uint votes) view private returns(uint) {
+    function _calculateWithdrawVote(uint proposalId, uint votes) view internal returns(uint) {
         uint oldVotes = proposals[proposalId].votes[msg.sender];
         uint oldPrice = oldVotes ** 2;
         uint totalVotes = oldVotes - votes;
@@ -54,14 +52,16 @@ contract QuadraticVoting is IQuadraticVoting {
         return oldPrice - totalPrice;
     }
 
-    //Devuelve el umbral de una propuesta
-    function _calculateThreshold(uint proposalId) view private returns(uint) {
+    function _calculateThreshold(uint proposalId) view internal returns(uint) {
         return (2 + (proposals[proposalId].budget*10) / (address(this).balance*10))/10 * nParticipants + nProposals;
     }
 
-    function _clear() private {
+    function _clear() internal {
         nProposals = 0;
         initialProposalId = lastProposalId + 1;
+        delete pendingProposalsIds;
+        delete approvedProposalsIds;
+        delete signalingProposalsIds;
     }
 
     function openVoting() checkOwner checkCanOpenVoting external payable {
@@ -70,7 +70,7 @@ contract QuadraticVoting is IQuadraticVoting {
         emit OpenVote();
     }
 
-    function addParticipant() checkMinimumPurchaseAmount(msg.value) checkNonParticipant external payable {
+    function addParticipant() checkMinimumPurchaseAmount(msg.value) checkNonParticipant checkMaxTokens(msg.value / tokenPrice) external payable {
         participants[msg.sender] = true;
         tokenContract.mint(msg.sender, msg.value / tokenPrice);
         nParticipants++;
@@ -79,7 +79,7 @@ contract QuadraticVoting is IQuadraticVoting {
     function addProposal(string calldata title, string calldata description, uint budget, address executableProposal) checkParticipant checkOpenVoting external returns(uint) {
         Proposal memory proposal;
         proposal.owner = msg.sender;
-        proposal.executableProposal = IExecutableProposal(executableProposal);//IExecutableProposal(payable(executableProposal))Creo que es así
+        proposal.executableProposal = IExecutableProposal(executableProposal);
         proposal.title = title;
         proposal.description = description;
         proposal.budget = budget;
@@ -87,39 +87,35 @@ contract QuadraticVoting is IQuadraticVoting {
         proposal.tokensAmount = 0;
         proposal.state = ProposalState.ENABLED;
         lastProposalId++;
-        //
-        if(budget!=0){//guardo en la propuesta la posicion que ocupa en el array respectivo suponiendo que push meta en la última
-            proposal.posArrays=pendingProposalsIds.length;
+        if (budget != 0) {
+            proposal.posArrays = pendingProposalsIds.length;
             pendingProposalsIds.push(lastProposalId);
-        }else{
-            proposal.posArrays=signalingProposalsIds.length;
+        } else {
+            proposal.posArrays = signalingProposalsIds.length;
             signalingProposalsIds.push(lastProposalId);
         }
-        //
         proposals[lastProposalId] = proposal;
         nProposals++;
-
         return lastProposalId;
     }
 
-    function cancelProposal(uint id) checkParticipant checkOpenVoting checkProposalOwner(id) checkEnabledProposal(id) external {
+    function cancelProposal(uint id) checkParticipant checkValidProposal(id) checkOpenVoting checkProposalOwner(id) checkEnabledProposal(id) external {
         proposals[id].state = ProposalState.DISABLED;
-        //
-        if(proposals[id].budget!=0){
-            uint idUltima = pendingProposalsIds[pendingProposalsIds.length-1];//id de la ultima propuesta de array pending
-            uint posABorrar = proposals[id].posArrays;//posicion de propuesta q hay q borrar en pending
-            proposals[idUltima].posArrays = posABorrar;//actualizo pos de la ultima q ocupara la pos en pending de la borrada
-            pendingProposalsIds[posABorrar]= idUltima;//actualizo el id de la posicion de pending q ocupaba la q se borra
-            pendingProposalsIds.pop();//elimino la ultima q ha sido guardada en la posicion de la q queriamos borrar
-        }else{
-            uint idUltima = signalingProposalsIds[signalingProposalsIds.length-1];
-            uint posABorrar = proposals[id].posArrays;
-            proposals[idUltima].posArrays = posABorrar;
-            signalingProposalsIds[posABorrar]= idUltima;
+
+        if (proposals[id].budget != 0) {
+            uint lastPendingProposalId = pendingProposalsIds[pendingProposalsIds.length - 1];
+            uint posToDelete = proposals[id].posArrays;
+            proposals[lastPendingProposalId].posArrays = posToDelete;
+            pendingProposalsIds[posToDelete] = lastPendingProposalId;
+            pendingProposalsIds.pop();
+        } else {
+            uint lastSignalingProposalId = signalingProposalsIds[signalingProposalsIds.length - 1];
+            uint posToDelete = proposals[id].posArrays;
+            proposals[lastSignalingProposalId].posArrays = posToDelete;
+            signalingProposalsIds[posToDelete] = lastSignalingProposalId;
             signalingProposalsIds.pop();
         }
-        delete proposals[id].posArrays;
-        //
+
         emit CanWithdrawnFromProposal(id);
     }
 
@@ -136,42 +132,15 @@ contract QuadraticVoting is IQuadraticVoting {
         return tokenContract;
     }
 
-    function getPendingProposals() checkOpenVoting external returns(uint[] memory) {
-        delete pendingProposalsIds;//TODO¿?No tengo claro para qué
-
-        //Duda ya preguntada a Jesús, tiene coste lineal respecto al número de propuestas actuales
-        for (uint id = initialProposalId; id <= lastProposalId; id++) {
-            if (proposals[id].state == ProposalState.ENABLED && proposals[id].budget > 0) {
-                pendingProposalsIds.push(id);
-            }
-        }
-
+    function getPendingProposals() checkOpenVoting view external returns(uint[] memory) {
         return pendingProposalsIds;
     }
 
-    function getApprovedProposals() checkOpenVoting external returns(uint[] memory) {
-        delete approvedProposalsIds;
-
-        //Duda ya preguntada a Jesús, tiene coste lineal respecto al número de propuestas actuales
-        for (uint id = initialProposalId; id <= lastProposalId; id++) {
-            if (proposals[id].state == ProposalState.APPROVED && proposals[id].budget > 0) {
-                approvedProposalsIds.push(id);
-            }
-        }
-
+    function getApprovedProposals() checkOpenVoting view external returns(uint[] memory) {
         return approvedProposalsIds;
     }
 
-    function getSignalingProposals() checkOpenVoting external returns(uint[] memory) {
-        delete signalingProposalsIds;
-
-        //Duda ya preguntada a Jesús, tiene coste lineal respecto al número de propuestas actuales
-        for (uint id = initialProposalId; id <= lastProposalId; id++) {
-            if (proposals[id].state != ProposalState.DISABLED && proposals[id].budget == 0) {
-                signalingProposalsIds.push(id);
-            }
-        }
-
+    function getSignalingProposals() checkOpenVoting view external returns(uint[] memory) {
         return signalingProposalsIds;
     }
 
@@ -179,9 +148,9 @@ contract QuadraticVoting is IQuadraticVoting {
         return (proposals[id].title, proposals[id].description, proposals[id].executableProposal);
     }
 
-    function stake(uint id, uint votes) checkParticipant checkValidProposal(id) checkEnabledProposal(id) checkTokenAmount(_calculateVoteCost(id, votes)) external {
+    function stake(uint id, uint votes) checkParticipant checkValidProposal(id) checkEnabledProposal(id) checkTokenAmount(_calculateVoteCost(id, votes)) checkAllowanceTokensAmount(_calculateVoteCost(id, votes)) external {
         uint tokenCost = _calculateVoteCost(id, votes);
-        tokenContract.transfer(address(this), tokenCost);
+        tokenContract.transferFrom(msg.sender, address(this), tokenCost);
         proposals[id].votesAmount += votes;
         proposals[id].tokensAmount += tokenCost;
         if (proposals[id].budget > 0) {
@@ -189,7 +158,7 @@ contract QuadraticVoting is IQuadraticVoting {
         }
     }
 
-    function _withdrawFromFinanceProposal(uint amount, uint id) checkValidProposal(id) checkNonDisabledProposal(id) private {
+    function _withdrawFromFinanceProposal(uint amount, uint id) internal {
         uint tokenAmount = _calculateWithdrawVote(id, amount);
         proposals[id].votesAmount -= amount;
         proposals[id].votes[msg.sender] -= amount;
@@ -197,7 +166,7 @@ contract QuadraticVoting is IQuadraticVoting {
         tokenContract.transfer(msg.sender, tokenAmount);
     }
 
-    function _withdrawFromSignalingProposal(uint amount, uint id)  private {
+    function _withdrawFromSignalingProposal(uint amount, uint id) internal {
         if (votingState == QuadraticVotingState.OPEN) {
             uint tokenAmount = _calculateWithdrawVote(id, amount);
             proposals[id].votesAmount -= amount;
@@ -206,12 +175,17 @@ contract QuadraticVoting is IQuadraticVoting {
             tokenContract.transfer(msg.sender, tokenAmount);
         } else if (votingState == QuadraticVotingState.WAITING) {
             uint tokenAmount = _calculateWithdrawVote(id, amount);
-            proposals[id].votes[msg.sender] -= amount;//TODO si está en waiting no habría que restar votos creo
+            /*
+            Waiting es el estado de paso antes de reiniciar, cuando se permite a los participantes retirar sus votos de signaling.
+            Ojo que esto es el mapping de votos, la variable votesAmount se deja como está.
+            Necesitamos quitarlo del mapping por que es la forma de saber cuantos votos realizó el participante. Puede retirar hoy 2 votos y mañana 4, si quiere.
+            */
+            proposals[id].votes[msg.sender] -= amount;
             tokenContract.transfer(msg.sender, tokenAmount);
         }
     }
 
-    function withdrawFromProposal(uint amount, uint id) checkParticipant checkValidProposal(id) checkVotes(id, amount) external {
+    function withdrawFromProposal(uint amount, uint id) checkParticipant checkValidProposal(id) checkNonDisabledProposal(id) checkVotes(id, amount) external {
         if (proposals[id].budget > 0) _withdrawFromFinanceProposal(amount, id);
         else _withdrawFromSignalingProposal(amount, id);
     }
@@ -221,7 +195,7 @@ contract QuadraticVoting is IQuadraticVoting {
         return proposal.budget < address(this).balance && proposal.votesAmount > _calculateThreshold(proposalId);
     }
     
-    function _approveProposal(uint proposalId) private {
+    function _approveProposal(uint proposalId) internal {
         nProposals--;
         proposals[proposalId].state = ProposalState.APPROVED;
         Proposal memory proposal = proposals[proposalId];
@@ -229,26 +203,24 @@ contract QuadraticVoting is IQuadraticVoting {
         if (proposal.budget > 0) {
             tokenContract.burn(address(this), proposal.tokensAmount);
         }
-        
-        //No lo combino con el if de arriba por si no se queda este codigo
-        if(proposals[proposalId].budget>0){
-            uint idUltima = pendingProposalsIds[pendingProposalsIds.length-1];//id de la ultima propuesta de array pending
-            uint posABorrar = proposals[proposalId].posArrays;//posicion de propuesta q hay q borrar en pending
-            proposals[idUltima].posArrays = posABorrar;//actualizo pos de la ultima q ocupara la pos en pending de la borrada
-            pendingProposalsIds[posABorrar]= idUltima;//actualizo el id de la posicion de pending q ocupaba la q se borra
-            pendingProposalsIds.pop();//elimino la ultima q ha sido guardada en la posicion de la q queriamos borrar
-        }else{
-            uint idUltima = signalingProposalsIds[signalingProposalsIds.length-1];
-            uint posABorrar = proposals[proposalId].posArrays;
-            proposals[idUltima].posArrays = posABorrar;
-            signalingProposalsIds[posABorrar]= idUltima;
+
+        if (proposals[proposalId].budget>0) {
+            uint lastPendingProposalId = pendingProposalsIds[pendingProposalsIds.length-1];
+            uint posToDelete = proposals[proposalId].posArrays;
+            proposals[lastPendingProposalId].posArrays = posToDelete;
+            pendingProposalsIds[posToDelete]= lastPendingProposalId;
+            pendingProposalsIds.pop();
+            proposals[proposalId].posArrays = approvedProposalsIds.length;
+            approvedProposalsIds.push(proposalId);
+        } else {
+            uint lastPendingProposalId = signalingProposalsIds[signalingProposalsIds.length-1];
+            uint posToDelete = proposals[proposalId].posArrays;
+            proposals[lastPendingProposalId].posArrays = posToDelete;
+            signalingProposalsIds[posToDelete]= lastPendingProposalId;
             signalingProposalsIds.pop();
         }
-        proposals[proposalId].posArrays=approvedProposalsIds.length;
-        approvedProposalsIds.push(proposalId);
-        //
-
-        proposal.executableProposal.executeProposal.value(proposal.budget)(proposalId, proposal.votesAmount, proposal.tokensAmount);
+        
+        proposal.executableProposal.executeProposal.gas(100000).value(proposal.budget)(proposalId, proposal.votesAmount, proposal.tokensAmount);
     }
 
     function _checkAndExecuteProposal(uint id) internal {
@@ -262,7 +234,7 @@ contract QuadraticVoting is IQuadraticVoting {
         emit WaitingVote();
     }
 
-    function executeSignaling(uint id) checkParticipant checkProposalOwner(id) checkWaitingVoting external {
+    function executeSignaling(uint id) checkParticipant checkValidProposal(id) checkProposalOwner(id) checkSignalingProposal(id) checkWaitingVoting external {
         _approveProposal(id);
     }
 
@@ -278,11 +250,6 @@ contract QuadraticVoting is IQuadraticVoting {
 
     modifier checkNonParticipant() {
         require(!participants[msg.sender], "Already participant");
-        _;
-    }
-
-    modifier checkClosedVoting() {
-        require(votingState == QuadraticVotingState.CLOSED, "Voting not closed");
         _;
     }
 
@@ -317,7 +284,12 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     modifier checkTokenAmount(uint amount) {
-        require(amount >= tokenContract.balanceOf(msg.sender), "Invalid amount");
+        require(amount <= tokenContract.balanceOf(msg.sender), "Invalid amount");
+        _;
+    }
+
+    modifier checkAllowanceTokensAmount(uint amount) {
+        require(amount <= tokenContract.allowance(msg.sender, address(this)), "Invalid allowance amount");
         _;
     }
 
@@ -336,18 +308,13 @@ contract QuadraticVoting is IQuadraticVoting {
         _;
     }
 
-    modifier checkDisabledProposal(uint id) {
-        require(proposals[id].state == ProposalState.DISABLED, "Proposal not disabled");
-        _;
-    }
-
-    modifier checkApprovedProposal(uint id) {
-        require(proposals[id].state == ProposalState.APPROVED, "Proposal not approved");
-        _;
-    }
-
     modifier checkNonDisabledProposal(uint id) {
         require(proposals[id].state != ProposalState.DISABLED, "Proposal disabled");
+        _;
+    }
+
+    modifier checkSignalingProposal(uint id) {
+        require(proposals[id].budget == 0, "Proposal non signaling");
         _;
     }
 }

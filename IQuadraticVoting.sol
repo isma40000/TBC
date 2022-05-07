@@ -33,9 +33,9 @@ interface IQuadraticVoting {
     function buyTokens() external payable;
     function sellTokens(uint amount) external;
     function getERC20() view external returns(UCMToken);
-    function getPendingProposals() external returns(uint[] memory);
-    function getApprovedProposals() external returns(uint[] memory);
-    function getSignalingProposals() external returns(uint[] memory);
+    function getPendingProposals() view external returns(uint[] memory);
+    function getApprovedProposals() view external returns(uint[] memory);
+    function getSignalingProposals() view external returns(uint[] memory);
     function stake(uint id, uint votes) external;
     function withdrawFromProposal(uint amount, uint id) external;
     function closeVoting() external;

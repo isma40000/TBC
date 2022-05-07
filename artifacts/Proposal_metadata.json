@@ -25,6 +25,12 @@
 						"internalType": "uint256",
 						"name": "numTokens",
 						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "budget",
+						"type": "uint256"
 					}
 				],
 				"name": "ProposalExecuted",
@@ -84,10 +90,10 @@
 			]
 		},
 		"Proposal.sol": {
-			"keccak256": "0xc7f6ab5e88e19e94f8b6cb3ac8f51895a6c9d55fd6da85190adc44290abaf29e",
+			"keccak256": "0x18cb65562d2c8ecff31910872f034d26b194075e8b1448ea7c8b0e4f3e04bff5",
 			"urls": [
-				"bzz-raw://9a485515769463881593e6a8ad4023b32190adafebbc61042eb05ede57331680",
-				"dweb:/ipfs/QmfWfKEzkMvuUTfzxPzicoZbi1DMttxmoRwDDUZCaunn7w"
+				"bzz-raw://8a3e6dae286f7163a829b4aa83100215b7450ac8790c737c2f38989cc6fa8cb0",
+				"dweb:/ipfs/QmdSKCdEiYk1wySAKF3wRJSEUrNiVcBkUHqge5CKZorM9q"
 			]
 		}
 	},

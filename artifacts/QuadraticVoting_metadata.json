@@ -141,7 +141,7 @@
 				"type": "function"
 			},
 			{
-				"constant": false,
+				"constant": true,
 				"inputs": [],
 				"name": "getApprovedProposals",
 				"outputs": [
@@ -152,7 +152,7 @@
 					}
 				],
 				"payable": false,
-				"stateMutability": "nonpayable",
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -171,7 +171,7 @@
 				"type": "function"
 			},
 			{
-				"constant": false,
+				"constant": true,
 				"inputs": [],
 				"name": "getPendingProposals",
 				"outputs": [
@@ -182,7 +182,7 @@
 					}
 				],
 				"payable": false,
-				"stateMutability": "nonpayable",
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -217,7 +217,7 @@
 				"type": "function"
 			},
 			{
-				"constant": false,
+				"constant": true,
 				"inputs": [],
 				"name": "getSignalingProposals",
 				"outputs": [
@@ -228,7 +228,7 @@
 					}
 				],
 				"payable": false,
-				"stateMutability": "nonpayable",
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -324,17 +324,17 @@
 			]
 		},
 		"IQuadraticVoting.sol": {
-			"keccak256": "0x96fcf4cdfa8924e6b50923cf87ef4877a82944f20bf27997b3352a191ccd6dc2",
+			"keccak256": "0xf75555335c147369f0bb09b9b72a630f5fafd63bc5eed6dbb8c2540b208df9f4",
 			"urls": [
-				"bzz-raw://e177b8c3e2630309e06685c4cbebf89531135e08591f129bce54518cc8450baf",
-				"dweb:/ipfs/QmbYor4eCcBHZkvMKQAsUb2pRcmyKYfcpLXQv9vFNqqfZQ"
+				"bzz-raw://e0363d5cbde850c6ae705957a628e09b64dc99b2262ce75a46ae2394ac58f230",
+				"dweb:/ipfs/Qma9oB7vVD16cbAfShLfJmp34rgPc3dUhXtZnRVwqSJw4G"
 			]
 		},
 		"QuadraticVoting.sol": {
-			"keccak256": "0xb1409c65717dd463c84ea06b675e6f71f0830aaacc001ac8cd22779ac4407c9d",
+			"keccak256": "0x47380c795051541268b85e63ca8123ccbc892785af57a209bc9b76ca68498a19",
 			"urls": [
-				"bzz-raw://ddeb731ce33e66283db583bf95f4d87d60d4d977308dd70a7ac51f35fe89bbb1",
-				"dweb:/ipfs/QmYDHKoZdvUNCbs5KhwdSUGSkth6kwRFWijgxrKC9HLWoq"
+				"bzz-raw://c7421383950a95b9b42218ec3842a2b848ebe94d31e60352ab3ed5b742246e21",
+				"dweb:/ipfs/QmSkYGbj88FDXcG1cq6eazwYk42fLg6eiev8MpCK6xwhDb"
 			]
 		},
 		"UCMToken.sol": {

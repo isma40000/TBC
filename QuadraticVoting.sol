@@ -237,6 +237,7 @@ contract QuadraticVoting is IQuadraticVoting {
 
     function closeVoting() checkOwner checkOpenVoting external {
         votingState = QuadraticVotingState.WAITING;
+        address(uint160(owner)).transfer(address(this).balance);
         closedate = now;
         emit WaitingVote();
     }

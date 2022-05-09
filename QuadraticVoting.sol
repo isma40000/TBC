@@ -55,7 +55,7 @@ contract QuadraticVoting is IQuadraticVoting {
     }
 
     function _calculateThreshold(uint proposalId) view internal returns(uint) {
-        return (2 + (proposals[proposalId].budget*10) / (address(this).balance*10))/10 * nParticipants + nProposals;
+        return nProposals + nParticipants * (2 + (proposals[proposalId].budget*10) / (address(this).balance*10))/10;
     }
 
     function _clear() internal {

@@ -191,7 +191,7 @@ contract QuadraticVoting is IQuadraticVoting {
         }
     }
 
-    function withdrawFromProposal(uint amount, uint id) checkParticipant checkValidProposal(id) checkNonDisabledProposal(id) checkVotes(id, amount) external {
+    function withdrawFromProposal(uint amount, uint id) checkParticipant checkValidProposal(id) checkVotes(id, amount) external {
         if (proposals[id].budget > 0) _withdrawFromFinanceProposal(amount, id);
         else _withdrawFromSignalingProposal(amount, id);
     }

@@ -346,10 +346,10 @@
 			]
 		},
 		"QuadraticVoting.sol": {
-			"keccak256": "0x491e7c277404fcb33f055b0f47912ac9e2f2f1f9c013dc3ca8c6aaa73f16d81f",
+			"keccak256": "0x5d04952af4c0bbd5699a9a5e51d03aab263464b5ce660f2423e000f595768135",
 			"urls": [
-				"bzz-raw://c8228985bd3b5fc67f157a395ba4546a3664eb7ad3ca7083b1c2d75f4a353d4a",
-				"dweb:/ipfs/QmPKbnFXKhxhSziF3Fg5M81vCL99dU5XG2Wo6mTXNP4BmA"
+				"bzz-raw://f52c32dbaf4f7bb796aae65dc8a9f481a4842330c02695e65501f3d21bc0f565",
+				"dweb:/ipfs/QmNga6wykzraPQyy5tUwQ6pjYER879NoPvEfF6zCECtPiY"
 			]
 		},
 		"UCMToken.sol": {
